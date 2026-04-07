@@ -28,4 +28,5 @@ urlpatterns = [
     path("friends/remove/<int:user_id>/", views.remove_friend, name="remove_friend"),
     path("feed/", views.social_feed, name="social_feed"),
     path("leaderboard/", views.leaderboard, name="leaderboard"),
+    path("global/", views.global_leaderboard, name="global_leaderboard"),
 ]

@@ -28,21 +28,12 @@ def dashboard(request):
             (completed_today / (total_count + completed_today)) * 100
         )
 
-    friends_list = []
-    for fr in FriendRequest.objects.filter(
-        Q(from_user=request.user) | Q(to_user=request.user), status="accepted"
-    ):
-        if fr.from_user == request.user:
-            friends_list.append(fr.to_user)
-        else:
-            friends_list.append(fr.from_user)
-
-    friends_list.append(request.user)
+    all_users = User.objects.all()
 
     leaderboard_data = []
-    for user in friends_list:
+    for user in all_users:
         completed_tasks = Task.objects.filter(
-            user=user, completed_at__isnull=False
+            user=user, completed_at__date=today
         ).count()
         leaderboard_data.append(
             {
@@ -483,5 +474,42 @@ def leaderboard(request):
             "leaderboard_by_streak": leaderboard_by_streak,
             "leaderboard_by_best": leaderboard_by_best,
             "friends_list": friends_list,
+        },
+    )
+
+
+def global_leaderboard(request):
+    today = timezone.now().date()
+    all_users = User.objects.all()
+
+    leaderboard_data = []
+    for user in all_users:
+        completed_today = Task.objects.filter(
+            user=user, completed_at__date=today
+        ).count()
+        leaderboard_data.append(
+            {
+                "user": user,
+                "completed_tasks": completed_today,
+                "current_streak": user.current_streak,
+                "longest_streak": user.longest_streak,
+            }
+        )
+
+    leaderboard_data.sort(key=lambda x: x["completed_tasks"], reverse=True)
+
+    leaderboard_by_streak = sorted(leaderboard_data, key=lambda x: -x["current_streak"])
+    leaderboard_by_best = sorted(leaderboard_data, key=lambda x: -x["longest_streak"])
+
+    for i, entry in enumerate(leaderboard_data):
+        entry["rank"] = i + 1
+
+    return render(
+        request,
+        "tasks/global_leaderboard.html",
+        {
+            "leaderboard": leaderboard_data,
+            "leaderboard_by_streak": leaderboard_by_streak,
+            "leaderboard_by_best": leaderboard_by_best,
         },
     )
