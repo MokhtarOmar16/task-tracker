@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}History - TaskFlow{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h2>Task History</h2>
+        <p class="text-muted">All completed tasks</p>
+    </div>
+    <div class="col-auto">
+        <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">Back to Dashboard</a>
+    </div>
+</div>
+
+{% if tasks %}
+    <div class="list-group">
+        {% for task in tasks %}
+            <div class="list-group-item">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="mb-0"><s>{{ task.title }}</s></h5>
+                        <p class="mb-0 text-muted">Completed: {{ task.completed_at|date:"M d, Y H:i" }}</p>
+                    </div>
+                    {% if task.is_public %}
+                        <span class="badge bg-info">Public</span>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <p class="text-muted">No completed tasks yet.</p>
+{% endif %}
+{% endblock %}

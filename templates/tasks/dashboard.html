@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - TaskFlow{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h2>Today's Tasks</h2>
+        <p class="text-muted">Current Streak: <strong>{{ user.current_streak }}</strong> days | Best: <strong>{{ user.longest_streak }}</strong> days</p>
+    </div>
+    <div class="col-auto">
+        <a href="{% url 'create_task' %}" class="btn btn-primary">Add Task</a>
+        <a href="{% url 'history' %}" class="btn btn-outline-secondary">History</a>
+    </div>
+</div>
+
+<div class="row mb-3">
+    <div class="col">
+        <strong>Progress:</strong> {{ completed_count }}/{{ total_count }} tasks completed
+    </div>
+</div>
+
+{% if tasks %}
+    <div class="list-group">
+        {% for task in tasks %}
+            <div class="list-group-item {% if task.completed_at %}list-group-item-success{% endif %}">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="mb-0">
+                            {% if task.completed_at %}
+                                <s>{{ task.title }}</s>
+                            {% else %}
+                                {{ task.title }}
+                            {% endif %}
+                            {% if task.is_public %}
+                                <span class="badge bg-info">Public</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Private</span>
+                            {% endif %}
+                        </h5>
+                        {% if task.notes %}
+                            <p class="mb-0 text-muted">{{ task.notes }}</p>
+                        {% endif %}
+                    </div>
+                    <div>
+                        {% if not task.completed_at %}
+                            <a href="{% url 'complete_task' task.id %}" class="btn btn-sm btn-success">Complete</a>
+                        {% endif %}
+                        <a href="{% url 'delete_task' task.id %}" class="btn btn-sm btn-danger">Delete</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <p class="text-muted">No tasks for today. Add a task to get started!</p>
+{% endif %}
+{% endblock %}
