@@ -12,6 +12,9 @@ def dashboard(request):
     )
     completed_count = tasks.filter(completed_at__isnull=False).count()
     total_count = tasks.count()
+    progress_percent = 0
+    if total_count > 0:
+        progress_percent = int((completed_count / total_count) * 100)
     return render(
         request,
         "tasks/dashboard.html",
@@ -19,6 +22,7 @@ def dashboard(request):
             "tasks": tasks,
             "completed_count": completed_count,
             "total_count": total_count,
+            "progress_percent": progress_percent,
         },
     )
 
