@@ -56,7 +56,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                         <span class="text-light fw-bold">{{ friend.username|make_list|first|upper }}</span>
                                     </div>
                                     <div>
-                                        <h5 class="mb-0">{{ friend.username }}</h5>
+                                        <h5 class="mb-0"><a href="{% url 'user_profile' friend.username %}" class="text-decoration-none text-light">{{ friend.username }}</a></h5>
                                         <p class="mb-0 text-muted small">
                                             <span class="text-warning">🔥</span> {{ friend.current_streak }} | <span class="text-info">⭐</span> {{ friend.longest_streak }}
                                         </p>

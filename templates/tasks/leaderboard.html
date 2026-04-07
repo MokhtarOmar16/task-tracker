@@ -29,7 +29,7 @@
                                         {% if entry.rank == 1 %}🥇{% elif entry.rank == 2 %}🥈{% elif entry.rank == 3 %}🥉{% else %}{{ entry.rank }}{% endif %}
                                     </span>
                                     <div>
-                                        <h6 class="mb-0 {% if entry.user == user %}text-warning{% endif %}">{{ entry.user.username }}</h6>
+<h6 class="mb-0 {% if entry.user == user %}text-warning{% endif %}"><a href="{% url 'user_profile' entry.user.username %}" class="text-decoration-none {% if entry.user == user %}text-warning{% else %}text-light{% endif %}">{{ entry.user.username }}</a></h6>
                                     </div>
                                 </div>
                                 <span class="badge bg-success">{{ entry.completed_tasks }} tasks</span>

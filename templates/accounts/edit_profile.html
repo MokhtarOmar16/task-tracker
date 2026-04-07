@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Profile - TaskFlow{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">Edit Profile</h4>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{% url 'save_profile' %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Username</label>
+                        <input type="text" class="form-control" value="{{ user.username }}" disabled style="color:#555f6d; opacity: 0.7; cursor: not-allowed;">
+                        <small class="text-muted">Username cannot be changed</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Full Name</label>
+                        <input type="text" name="full_name" class="form-control" value="{{ user.full_name }}" placeholder="Enter your full name">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Bio</label>
+                        <textarea name="bio" class="form-control" rows="3" placeholder="Tell us about yourself">{{ user.bio }}</textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Daily Task Goal</label>
+                        <input type="number" name="task_goal" class="form-control" value="{{ user.task_goal }}" min="1" max="100">
+                        <small class="text-muted">How many tasks do you want to complete each day?</small>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <a href="{% url 'profile' %}" class="btn btn-secondary">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
