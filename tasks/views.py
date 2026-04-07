@@ -20,12 +20,13 @@ def dashboard(request):
     ).order_by("-created_at")
     completed_today = Task.objects.filter(
         user=request.user, created_at__date=today, completed_at__isnull=False
-    ).count()
+    ).order_by("-completed_at")
+    completed_count = completed_today.count()
     total_count = tasks.count()
     progress_percent = 0
-    if total_count + completed_today > 0:
+    if total_count + completed_count > 0:
         progress_percent = int(
-            (completed_today / (total_count + completed_today)) * 100
+            (completed_count / (total_count + completed_count)) * 100
         )
 
     all_users = User.objects.all()
@@ -49,13 +50,17 @@ def dashboard(request):
     for i, entry in enumerate(leaderboard_data):
         entry["rank"] = i + 1
 
+    total_daily = total_count + completed_count
+
     return render(
         request,
         "tasks/dashboard.html",
         {
             "tasks": tasks,
-            "completed_count": completed_today,
+            "completed_today": completed_today,
+            "completed_count": completed_count,
             "total_count": total_count,
+            "total_daily": total_daily,
             "progress_percent": progress_percent,
             "leaderboard": leaderboard_data,
         },
@@ -141,6 +146,16 @@ def complete_task(request, task_id):
         task.completed_at = timezone.now()
         task.save()
         TaskCompletion.objects.create(task=task)
+    return redirect("dashboard")
+
+
+@login_required
+def uncomplete_task(request, task_id):
+    task = get_object_or_404(Task, id=task_id, user=request.user)
+    if task.completed_at:
+        task.completed_at = None
+        task.save()
+        TaskCompletion.objects.filter(task=task).delete()
     return redirect("dashboard")
 
 
