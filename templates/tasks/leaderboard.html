@@ -48,7 +48,7 @@
             </div>
             <div class="card-body p-0">
                 <div class="list-group list-group-flush">
-                    {% for entry in leaderboard|dictsort:"current_streak" reversed %}
+                    {% for entry in leaderboard_by_streak %}
                         <div class="list-group-item {% if entry.user == user %}bg-primary bg-opacity-25{% endif %}">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div class="d-flex align-items-center">
@@ -71,7 +71,7 @@
     </div>
     <div class="card-body p-0">
         <div class="list-group list-group-flush">
-            {% for entry in leaderboard|dictsort:"longest_streak" reversed %}
+            {% for entry in leaderboard_by_best %}
                 <div class="list-group-item {% if entry.user == user %}bg-primary bg-opacity-25{% endif %}">
                     <div class="d-flex justify-content-between align-items-center">
                         <div class="d-flex align-items-center">
