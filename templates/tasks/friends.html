@@ -1,0 +1,197 @@
+{% extends 'base.html' %}
+
+{% block title %}Friends - TaskFlow{% endblock %}
+
+{% block content %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('tab') === 'find') {
+        document.getElementById('find-tab').click();
+    } else if (urlParams.get('tab') === 'requests') {
+        document.getElementById('requests-tab').click();
+    }
+});
+</script>
+
+<div class="row mb-4 align-items-center">
+    <div class="col">
+        <h2 class="mb-1">Friends</h2>
+        <p class="text-muted mb-0">Connect with other students</p>
+    </div>
+    <div class="col-auto">
+        <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">Dashboard</a>
+    </div>
+</div>
+
+<ul class="nav nav-tabs mb-4" id="friendsTab" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="friends-tab" data-bs-toggle="tab" data-bs-target="#friends" type="button">
+            My Friends ({{ friends_list|length }})
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="requests-tab" data-bs-toggle="tab" data-bs-target="#requests" type="button">
+            Requests {% if received_requests %}<span class="badge bg-danger">{{ received_requests|length }}</span>{% endif %}
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="find-tab" data-bs-toggle="tab" data-bs-target="#find" type="button">
+            Find Users
+        </button>
+    </li>
+</ul>
+
+<div class="tab-content" id="friendsTabContent">
+    <!-- My Friends Tab -->
+    <div class="tab-pane fade show active" id="friends" role="tabpanel">
+        {% if friends_list %}
+            <div class="row g-3">
+                {% for friend in friends_list %}
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card">
+                            <div class="card-body d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
+                                        <span class="text-light fw-bold">{{ friend.username|make_list|first|upper }}</span>
+                                    </div>
+                                    <div>
+                                        <h5 class="mb-0">{{ friend.username }}</h5>
+                                        <p class="mb-0 text-muted small">
+                                            <span class="text-warning">🔥</span> {{ friend.current_streak }} | <span class="text-info">⭐</span> {{ friend.longest_streak }}
+                                        </p>
+                                    </div>
+                                </div>
+                                <a href="{% url 'remove_friend' friend.id %}" class="btn btn-sm btn-danger" title="Remove friend" onclick="return confirm('Are you sure you want to remove {{ friend.username }} from friends?')">✕</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="card">
+                <div class="card-body text-center py-5">
+                    <p class="text-muted mb-3">No friends yet</p>
+                    <button class="btn btn-primary" data-bs-toggle="tab" data-bs-target="#find">Find Users</button>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Requests Tab -->
+    <div class="tab-pane fade" id="requests" role="tabpanel">
+        <h5 class="text-light mb-3">Received Requests</h5>
+        {% if received_requests %}
+            <div class="list-group mb-4">
+                {% for req in received_requests %}
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                                    <span class="text-light fw-bold">{{ req.from_user.username|make_list|first|upper }}</span>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0">{{ req.from_user.username }}</h6>
+                                    <p class="mb-0 text-muted small">{{ req.created_at|date:"M d, Y" }}</p>
+                                </div>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <a href="{% url 'accept_friend_request' req.id %}" class="btn btn-sm btn-success">Accept</a>
+                                <a href="{% url 'decline_friend_request' req.id %}" class="btn btn-sm btn-danger">Decline</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-muted">No pending requests</p>
+        {% endif %}
+
+        <h5 class="text-light mb-3">Sent Requests</h5>
+        {% if sent_requests %}
+            <div class="list-group">
+                {% for req in sent_requests %}
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-secondary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                                    <span class="text-light fw-bold">{{ req.to_user.username|make_list|first|upper }}</span>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0">{{ req.to_user.username }}</h6>
+                                    <p class="mb-0 text-muted small">{{ req.created_at|date:"M d, Y" }} - Pending</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-muted">No sent requests</p>
+        {% endif %}
+    </div>
+
+    <!-- Find Users Tab -->
+    <div class="tab-pane fade" id="find" role="tabpanel">
+        {% if suggested_users %}
+        <h5 class="text-light mb-3">Suggested Users</h5>
+        <div class="list-group mb-4">
+            {% for search_user in suggested_users %}
+                <div class="list-group-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-warning rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                                <span class="text-dark fw-bold">{{ search_user.username|make_list|first|upper }}</span>
+                            </div>
+                            <div>
+                                <h6 class="mb-0">{{ search_user.username }}</h6>
+                                <p class="mb-0 text-muted small">
+                                    <span class="text-warning">🔥</span> {{ search_user.current_streak }} | <span class="text-info">⭐</span> {{ search_user.longest_streak }} best
+                                </p>
+                            </div>
+                        </div>
+                        <a href="{% url 'send_friend_request' search_user.id %}" class="btn btn-sm btn-warning">Add</a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <hr class="text-muted">
+        
+        <form method="get" class="mb-4 mt-3">
+            <input type="hidden" name="tab" value="find">
+            <div class="input-group">
+                <input type="text" name="q" class="form-control" placeholder="Search by username..." value="{{ search_query }}">
+                <button type="submit" class="btn btn-primary">Search</button>
+            </div>
+        </form>
+
+        {% if search_query and search_results %}
+            <h5 class="text-light mb-3">Results</h5>
+            <div class="list-group">
+                {% for search_user in search_results %}
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                                    <span class="text-light fw-bold">{{ search_user.username|make_list|first|upper }}</span>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0">{{ search_user.username }}</h6>
+                                    <p class="mb-0 text-muted small">
+                                        <span class="text-warning">🔥</span> {{ search_user.current_streak }} | <span class="text-info">⭐</span> {{ search_user.longest_streak }} best
+                                    </p>
+                                </div>
+                            </div>
+                            <a href="{% url 'send_friend_request' search_user.id %}" class="btn btn-sm btn-primary">Add Friend</a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% elif search_query %}
+            <p class="text-muted">No users found matching "{{ search_query }}"</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

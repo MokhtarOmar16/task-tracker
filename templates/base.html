@@ -135,11 +135,46 @@
         .badge.bg-secondary {
             background-color: var(--bg-secondary) !important;
         }
+        .nav-tabs .nav-link {
+            color: var(--text-muted);
+            border-color: var(--border-color);
+        }
+        .nav-tabs .nav-link.active {
+            background-color: var(--bg-card) !important;
+            color: var(--text-primary) !important;
+            border-color: var(--border-color);
+            border-bottom-color: var(--bg-card);
+        }
+        .list-group-item {
+            background-color: var(--bg-card);
+            border-color: var(--border-color);
+            color: var(--text-primary);
+        }
         a {
             color: var(--color-primary);
         }
         a:hover {
             color: #79b8ff;
+        }
+        .dropdown-menu {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+        }
+        .dropdown-item {
+            color: var(--text-primary);
+        }
+        .dropdown-item:hover {
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+        .dropdown-divider {
+            border-color: var(--border-color);
+        }
+        h5, h6, .h5, .h6 {
+            color: var(--text-primary) !important;
+        }
+        .text-muted {
+            color: var(--text-muted) !important;
         }
     </style>
 </head>
@@ -151,13 +186,29 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
+                <ul class="navbar-nav me-auto">
                     {% if user.is_authenticated %}
                         <li class="nav-item">
-                            <span class="navbar-text me-3">Hello, {{ user.username }}</span>
+                            <a class="nav-link" href="{% url 'social_feed' %}">Feed</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+                            <a class="nav-link" href="{% url 'friends' %}">Friends</a>
+                        </li>
+                    {% endif %}
+                </ul>
+                <ul class="navbar-nav">
+                    {% if user.is_authenticated %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                {{ user.username }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="{% url 'dashboard' %}">Dashboard</a></li>
+                                <li><a class="dropdown-item" href="{% url 'calendar' %}">Calendar</a></li>
+                                <li><a class="dropdown-item" href="{% url 'leaderboard' %}">Leaderboard</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{% url 'logout' %}">Logout</a></li>
+                            </ul>
                         </li>
                     {% else %}
                         <li class="nav-item">

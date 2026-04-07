@@ -17,7 +17,9 @@
     </div>
     <div class="col-auto">
         <a href="{% url 'create_task' %}" class="btn btn-primary">+ Add Task</a>
+        <a href="{% url 'calendar' %}" class="btn btn-outline-secondary">Calendar</a>
         <a href="{% url 'history' %}" class="btn btn-outline-secondary">History</a>
+        <a href="{% url 'friends' %}" class="btn btn-outline-secondary">Friends</a>
     </div>
 </div>
 
@@ -34,7 +36,7 @@
 {% endif %}
 
 {% if tasks %}
-    <div class="list-group">
+    <div class="list-group mb-4">
         {% for task in tasks %}
             <div class="list-group-item {% if task.completed_at %}list-group-item-success{% endif %}">
                 <div class="d-flex justify-content-between align-items-center">
@@ -59,18 +61,54 @@
                         {% if not task.completed_at %}
                             <a href="{% url 'complete_task' task.id %}" class="btn btn-sm btn-success">✓</a>
                         {% endif %}
-                        <a href="{% url 'delete_task' task.id %}" class="btn btn-sm btn-danger">✕</a>
+                        <a href="{% url 'edit_task' task.id %}" class="btn btn-sm btn-warning">✎</a>
+                        <a href="{% url 'delete_task' task.id %}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this task?')">✕</a>
                     </div>
                 </div>
             </div>
         {% endfor %}
     </div>
 {% else %}
-    <div class="card">
+    <div class="card mb-4">
         <div class="card-body text-center py-5">
             <p class="text-muted mb-3">No tasks for today</p>
             <a href="{% url 'create_task' %}" class="btn btn-primary">+ Create Your First Task</a>
         </div>
     </div>
 {% endif %}
+
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">🏆 Leaderboard</h5>
+        <a href="{% url 'leaderboard' %}" class="btn btn-sm btn-outline-secondary">Full View</a>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-dark mb-0">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>User</th>
+                        <th>Tasks</th>
+                        <th>Streak 🔥</th>
+                        <th>Best ⭐</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entry in leaderboard %}
+                    <tr {% if entry.user == user %}class="table-primary"{% endif %}>
+                        <td>
+                            {% if entry.rank == 1 %}🥇{% elif entry.rank == 2 %}🥈{% elif entry.rank == 3 %}🥉{% else %}{{ entry.rank }}{% endif %}
+                        </td>
+                        <td>{{ entry.user.username }}</td>
+                        <td><span class="badge bg-success">{{ entry.completed_tasks }}</span></td>
+                        <td><span class="badge bg-warning text-dark">{{ entry.current_streak }}</span></td>
+                        <td><span class="badge bg-info">{{ entry.longest_streak }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 {% endblock %}

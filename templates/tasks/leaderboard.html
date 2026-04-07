@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% block title %}Leaderboard - TaskFlow{% endblock %}
+
+{% block content %}
+<div class="row mb-4 align-items-center">
+    <div class="col">
+        <h2 class="mb-1">Leaderboard</h2>
+        <p class="text-muted mb-0">Challenge your friends!</p>
+    </div>
+    <div class="col-auto">
+        <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">Dashboard</a>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0">🏆 By Tasks Completed</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush">
+                    {% for entry in leaderboard %}
+                        <div class="list-group-item {% if entry.user == user %}bg-primary bg-opacity-25{% endif %}">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <span class="badge bg-{% if entry.rank == 1 %}warning{% elif entry.rank == 2 %}secondary{% elif entry.rank == 3 %}danger{% else %}primary{% endif %} me-3" style="width: 30px;">
+                                        {% if entry.rank == 1 %}🥇{% elif entry.rank == 2 %}🥈{% elif entry.rank == 3 %}🥉{% else %}{{ entry.rank }}{% endif %}
+                                    </span>
+                                    <div>
+                                        <h6 class="mb-0 {% if entry.user == user %}text-warning{% endif %}">{{ entry.user.username }}</h6>
+                                    </div>
+                                </div>
+                                <span class="badge bg-success">{{ entry.completed_tasks }} tasks</span>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0">🔥 By Current Streak</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush">
+                    {% for entry in leaderboard|dictsort:"current_streak" reversed %}
+                        <div class="list-group-item {% if entry.user == user %}bg-primary bg-opacity-25{% endif %}">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    {% if forloop.counter == 1 %}<span class="text-warning me-2">🥇</span>{% endif %}
+                                    <h6 class="mb-0 {% if entry.user == user %}text-warning{% endif %}">{{ entry.user.username }}</h6>
+                                </div>
+                                <span class="badge bg-warning text-dark">{{ entry.current_streak }} days</span>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">⭐ All-Time Best Streak</h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="list-group list-group-flush">
+            {% for entry in leaderboard|dictsort:"longest_streak" reversed %}
+                <div class="list-group-item {% if entry.user == user %}bg-primary bg-opacity-25{% endif %}">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center">
+                            {% if forloop.counter == 1 %}<span class="text-info me-2">⭐</span>{% endif %}
+                            <h6 class="mb-0 {% if entry.user == user %}text-warning{% endif %}">{{ entry.user.username }}</h6>
+                        </div>
+                        <span class="badge bg-info">{{ entry.longest_streak }} days</span>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+{% load calendar_tags %}
+
+{% block title %}Calendar - TaskFlow{% endblock %}
+
+{% block content %}
+<div class="row mb-4 align-items-center">
+    <div class="col">
+        <h2 class="mb-1">Activity Calendar</h2>
+        <p class="text-muted mb-0">
+            <span class="me-3">
+                <span class="text-warning">🔥</span> Current: <strong>{{ user.current_streak }}</strong> days
+            </span>
+            <span>
+                <span class="text-info">⭐</span> Best: <strong>{{ user.longest_streak }}</strong> days
+            </span>
+        </p>
+    </div>
+    <div class="col-auto">
+        <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">Dashboard</a>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <a href="?y={{ prev_year }}&m={{ prev_month }}" class="btn btn-sm btn-outline-secondary">◀ Prev</a>
+            <h4 class="mb-0">{{ month_name }} {{ year }}</h4>
+            <a href="?y={{ next_year }}&m={{ next_month }}" class="btn btn-sm btn-outline-secondary">Next ▶</a>
+        </div>
+    </div>
+    <div class="card-body p-3">
+        <div class="row text-center mb-2 fw-bold">
+            <div class="col text-light">Sun</div>
+            <div class="col text-light">Mon</div>
+            <div class="col text-light">Tue</div>
+            <div class="col text-light">Wed</div>
+            <div class="col text-light">Thu</div>
+            <div class="col text-light">Fri</div>
+            <div class="col text-light">Sat</div>
+        </div>
+        
+        {% for week in calendar_weeks %}
+        <div class="row g-1 mb-1">
+            {% for day in week %}
+                {% if day %}
+                    {% if day in task_counts_by_date %}
+                        <div class="col position-relative">
+                            <div class="card h-100 {% if day == today %}border-primary{% endif %}"
+                                 style="cursor: pointer; min-height: 50px;"
+                                 data-bs-toggle="modal" 
+                                 data-bs-target="#dayModal{{ day|date:'Ymd' }}">
+                                <div class="card-body p-1 text-center d-flex flex-column justify-content-center">
+                                    <div class="text-light fw-bold">{{ day.day }}</div>
+                                    <div class="badge bg-success py-1">{% get_task_count day task_counts_list %}</div>
+                                    {% if day in streak_days %}
+                                        <span style="position:absolute; top:2px; right:2px; font-size:10px;">🔥</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="col position-relative">
+                            <div class="card h-100 {% if day == today %}border-primary{% endif %}" style="opacity: 0.5; min-height: 50px;">
+                                <div class="card-body p-1 text-center d-flex flex-column justify-content-center">
+                                    <div class="text-light fw-bold">{{ day.day }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <div class="col"></div>
+                {% endif %}
+            {% endfor %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0 text-light">Legend</h5>
+    </div>
+    <div class="card-body">
+        <div class="d-flex gap-3 flex-wrap">
+            <div class="text-light"><span class="badge bg-success">N</span> Completed tasks</div>
+            <div class="text-light">🔥 Streak day</div>
+            <div class="text-light">⬛ Today</div>
+        </div>
+    </div>
+</div>
+
+{% for date, tasks in task_counts_by_date.items %}
+<div class="modal fade" id="dayModal{{ date|date:'Ymd' }}" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content" style="background-color: var(--bg-card);">
+            <div class="modal-header">
+                <h5 class="modal-title text-light">{{ date|date:"F d, Y" }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                {% if tasks %}
+                    <ul class="list-group">
+                        {% for task in tasks %}
+                            <li class="list-group-item bg-transparent text-light">
+                                <span class="text-success">✓</span> {{ task.title }}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-muted">No tasks completed</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endblock %}

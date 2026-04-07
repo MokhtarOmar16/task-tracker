@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block title %}Social Feed - TaskFlow{% endblock %}
+
+{% block content %}
+<div class="row mb-4 align-items-center">
+    <div class="col">
+        <h2 class="mb-1">Social Feed</h2>
+        <p class="text-muted mb-0">See what your friends are working on</p>
+    </div>
+    <div class="col-auto">
+        <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">Dashboard</a>
+    </div>
+</div>
+
+{% if friends_list %}
+    {% if friend_tasks %}
+        <div class="list-group">
+            {% for task in friend_tasks %}
+                <div class="list-group-item {% if task.completed_at %}list-group-item-success{% endif %}">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 30px; height: 30px;">
+                                    <span class="text-light small fw-bold">{{ task.user.username|make_list|first|upper }}</span>
+                                </div>
+                                <span class="text-light small">{{ task.user.username }}</span>
+                                <span class="badge bg-warning text-dark ms-2">🔥 {{ task.user.current_streak }}</span>
+                            </div>
+                            <h5 class="mb-1 {% if task.completed_at %}text-success{% endif %}">
+                                {% if task.completed_at %}
+                                    <s>{{ task.title }}</s>
+                                {% else %}
+                                    {{ task.title }}
+                                {% endif %}
+                                {% if task.completed_at %}
+                                    <span class="badge bg-success ms-2">✓ Done</span>
+                                {% else %}
+                                    <span class="badge bg-secondary ms-2">In Progress</span>
+                                {% endif %}
+                            </h5>
+                            {% if task.notes %}
+                                <p class="mb-0 text-muted small">{{ task.notes }}</p>
+                            {% endif %}
+                        </div>
+                        <span class="text-muted small">{{ task.created_at|timesince }} ago</span>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <p class="text-muted mb-3">No public tasks from friends yet</p>
+                <p class="text-muted small">Friends need to mark their tasks as "Public" to appear here</p>
+            </div>
+        </div>
+    {% endif %}
+{% else %}
+    <div class="card">
+        <div class="card-body text-center py-5">
+            <p class="text-muted mb-3">No friends yet</p>
+            <a href="{% url 'friends' %}" class="btn btn-primary">Add Friends</a>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}
