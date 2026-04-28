@@ -1,0 +1,46 @@
+name: Deploy to Production Server
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Deploy to Production via SSH
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Prepare SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.PROD_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Create .env file
+        run: |
+          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" > .env
+          echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
+          echo "DEBUG=False" >> .env
+
+      - name: Sync Files to Production Server
+        run: |
+          rsync -az -e "ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no" \
+            --delete \
+            --exclude=".git" \
+            --exclude="venv" \
+            --exclude="__pycache__" \
+            --exclude="*.pyc" \
+            --exclude=".env" \
+            ./ \
+            ${{ secrets.SSH_USER }}@${{ secrets.PROD_HOST }}:/app/taskflow/
+
+      - name: Restart Docker on Production Server
+        run: |
+          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no \
+            ${{ secrets.SSH_USER }}@${{ secrets.PROD_HOST }} \
+            "cd /app/taskflow && docker compose -f docker-compose.prod.yml up -d --build"

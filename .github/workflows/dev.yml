@@ -1,0 +1,47 @@
+name: Deploy to Dev Server
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  deploy:
+    name: Deploy to Dev via SSH
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Prepare SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.DEV_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Create .env file
+        run: |
+          echo "DATABASE_URL=${{ secrets.DEV_DATABASE_URL }}" > .env
+          echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
+          echo "DEBUG=True" >> .env
+          cat .env
+
+      - name: Sync Files to Dev Server
+        run: |
+          rsync -az -e "ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no" \
+            --delete \
+            --exclude=".git" \
+            --exclude="venv" \
+            --exclude="__pycache__" \
+            --exclude="*.pyc" \
+            --exclude=".env" \
+            ./ \
+            ${{ secrets.SSH_USER }}@${{ secrets.DEV_HOST }}:/app/taskflow/
+
+      - name: Restart Docker on Dev Server
+        run: |
+          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no \
+            ${{ secrets.SSH_USER }}@${{ secrets.DEV_HOST }} \
+            "cd /app/taskflow && docker compose up -d --build"

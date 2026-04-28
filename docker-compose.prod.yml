@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: taskflow
+      POSTGRES_USER: taskflow_user
+      POSTGRES_PASSWORD: taskflow_pass
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U taskflow_user -d taskflow"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  web:
+    image: ${{ secrets.DOCKER_USERNAME }}/taskflow:latest
+    build:
+      context: .
+      dockerfile: Dockerfile_prod
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgres://taskflow_user:taskflow_pass@db:5432/taskflow
+      - DEBUG=False
+      - SECRET_KEY=$SECRET_KEY
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: always
+
+volumes:
+  postgres_data:

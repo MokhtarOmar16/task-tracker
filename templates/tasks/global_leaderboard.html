@@ -36,7 +36,7 @@
                                 <td>
                                     {% if entry.rank == 1 %}🥇{% elif entry.rank == 2 %}🥈{% elif entry.rank == 3 %}🥉{% else %}{{ entry.rank }}{% endif %}
                                 </td>
-                                <td><a href="{% url 'user_profile' entry.user.username %}" class="text-decoration-none text-light">{{ entry.user.username }}</a></td>
+                                <td><a href="{% url 'user_profile' entry.user.username %}" class="text-decoration-none{% if entry.user == user %} text-dark fw-bold{% else %} text-light{% endif %}">{{ entry.user.username }}</a></td>
                                 <td><span class="badge bg-success">{{ entry.completed_tasks }}</span></td>
                             </tr>
                             {% endfor %}
@@ -68,7 +68,7 @@
                                 <td>
                                     {% if forloop.counter == 1 %}🥇{% elif forloop.counter == 2 %}🥈{% elif forloop.counter == 3 %}🥉{% else %}{{ forloop.counter }}{% endif %}
                                 </td>
-                                <td>{{ entry.user.username }}</td>
+                                <td><a href="{% url 'user_profile' entry.user.username %}" class="text-decoration-none{% if entry.user == user %} text-dark fw-bold{% else %} text-light{% endif %}">{{ entry.user.username }}</a></td>
                                 <td><span class="badge bg-warning text-dark">{{ entry.current_streak }}</span></td>
                             </tr>
                             {% endfor %}
@@ -100,7 +100,7 @@
                         <td>
                             {% if forloop.counter == 1 %}🥇{% elif forloop.counter == 2 %}🥈{% elif forloop.counter == 3 %}🥉{% else %}{{ forloop.counter }}{% endif %}
                         </td>
-                        <td>{{ entry.user.username }}</td>
+                        <td><a href="{% url 'user_profile' entry.user.username %}" class="text-decoration-none{% if entry.user == user %} text-dark fw-bold{% else %} text-light{% endif %}">{{ entry.user.username }}</a></td>
                         <td><span class="badge bg-info">{{ entry.longest_streak }}</span></td>
                     </tr>
                     {% endfor %}

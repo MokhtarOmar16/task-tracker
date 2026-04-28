@@ -29,4 +29,6 @@ EXPOSE 8000
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 
-CMD ["gunicorn", "taskflow.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3"]
+# Dev: DEBUG server (runserver)
+# Prod: gunicorn
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
